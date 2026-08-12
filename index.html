@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hayley &amp; Marcus — 23rd January 2027</title>
-<meta name="description" content="The pleasure of your company is requested at the wedding of Hayley &amp; Marcus, Saturday 23rd January 2027 at Eastwood Park, Gloucestershire.">
+<meta name="description" content="The pleasure of your company is requested at the wedding of Hayley &amp; Marcus, Saturday 23rd January 2027 at Eastwood Park Country House.">
 
 <!-- Open Graph / link preview -->
 <meta property="og:title" content="Hayley &amp; Marcus — 23rd January 2027">
-<meta property="og:description" content="Join us at Eastwood Park, Gloucestershire for our wedding. RSVP and meal choices inside.">
+<meta property="og:description" content="Join us at Eastwood Park Country House for our wedding. RSVP and meal choices inside.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="assets/floral-crop.jpg">
 
@@ -40,8 +40,8 @@
         <path d="M69 7c3-4 6-4 6 0s3 4 6 0-3-4-6 0-6 4-6 0Z" stroke="currentColor" stroke-width="1"/>
       </svg>
 
-      <p class="date-line">Saturday, 23rd January 2027</p>
-      <p class="venue-line">Eastwood Park, Gloucestershire</p>
+      <p class="date-line">Saturday 23rd January 2027</p>
+      <p class="venue-line">Eastwood Park Country House</p>
 
       <svg class="divider" viewBox="0 0 150 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line x1="0" y1="7" x2="62" y2="7" stroke="currentColor" stroke-width="1"/>
@@ -68,10 +68,28 @@
     <div class="details-grid">
       <div class="detail-card">
         <h3>Venue</h3>
-        <p>Eastwood Park<br>Falfield, Wotton-under-Edge<br>Gloucestershire, GL12 8DA</p>
+        <p>Eastwood Park Country House<br>Falfield, Wotton-under-Edge<br>Gloucestershire, GL12 8DA</p>
         <p style="margin-top:8px;">
-          <a href="https://maps.google.com/?q=Eastwood+Park+Falfield+Gloucestershire" target="_blank" rel="noopener">View on Google Maps →</a>
+          <a href="https://maps.google.com/?q=Eastwood+Park+Country+House+Falfield+Gloucestershire" target="_blank" rel="noopener">View on Google Maps →</a>
         </p>
+      </div>
+
+      <div class="detail-card">
+        <h3>Hotel</h3>
+        <p>Booking a bedroom? Please call or email reception directly to book a room for the night of the wedding.</p>
+        <p style="margin-top:8px;">
+          01454 260207<br>
+          <a href="mailto:reception@eastwoodpark.co.uk">reception@eastwoodpark.co.uk</a>
+        </p>
+        <button type="button" class="reveal-btn" id="reveal-prices-btn" aria-expanded="false" aria-controls="hotel-prices">
+          Reveal hotel prices
+        </button>
+        <div id="hotel-prices" class="hotel-prices">
+          <p>Classic Double — <strong>£120</strong> per night, bed &amp; breakfast</p>
+          <p>Superior Room — <strong>£145</strong> per night, bed &amp; breakfast</p>
+          <p>Feature Room — <strong>£175</strong> per night, bed &amp; breakfast</p>
+          <p class="hotel-note">Demo prices — to be confirmed with the venue.</p>
+        </div>
       </div>
 
       <div class="detail-card">
@@ -219,6 +237,10 @@
 
           <div id="person-meal-blocks"></div>
 
+          <div class="evening-food-note">
+            <strong>Evening food</strong> — pulled pork rolls and fish &amp; chip cones will be served during the evening reception.
+          </div>
+
           <div class="field">
             <label for="dietary">Allergies or dietary requirements</label>
             <textarea id="dietary" name="dietary" placeholder="Let us know about any allergies, intolerances, or other dietary needs — please mention which person they apply to"></textarea>
@@ -233,6 +255,15 @@
             </div>
           </div>
           <div id="evening-guest-names"></div>
+
+          <div class="evening-food-note">
+            <strong>Evening food</strong> — pulled pork rolls and fish &amp; chip cones will be served during the evening reception.
+          </div>
+
+          <div class="field">
+            <label for="evening_dietary">Allergies or dietary requirements</label>
+            <textarea id="evening_dietary" name="evening_dietary" placeholder="Let us know about any allergies, intolerances, or other dietary needs — please mention which person they apply to"></textarea>
+          </div>
         </div>
 
       </div>
@@ -258,14 +289,23 @@
   // Toggle the meal-choice fields based on attendance response.
   const attendingRadios = document.querySelectorAll('input[name="attending"]');
   const attendingFields = document.getElementById('attending-fields');
+
+  // Reveal/hide demo hotel prices.
+  const revealBtn = document.getElementById('reveal-prices-btn');
+  const hotelPrices = document.getElementById('hotel-prices');
+  revealBtn.addEventListener('click', () => {
+    const isOpen = hotelPrices.classList.toggle('is-visible');
+    revealBtn.setAttribute('aria-expanded', String(isOpen));
+    revealBtn.textContent = isOpen ? 'Hide hotel prices' : 'Reveal hotel prices';
+  });
   const guestTypeRadios = document.querySelectorAll('input[name="guest_type"]');
   const mealFields = document.getElementById('meal-fields');
   const eveningFields = document.getElementById('evening-fields');
   const arrivalNote = document.getElementById('arrival-note');
 
   const ARRIVAL_COPY = {
-    'Day & Evening': `<strong>Please arrive from 12:00pm</strong> ahead of the 1:00pm ceremony at Eastwood Park, Gloucestershire. The wedding breakfast and evening celebration follow on.`,
-    'Evening Reception': `<strong>Please arrive from 7:00pm</strong> to join us at Eastwood Park, Gloucestershire, for the evening celebration.`
+    'Day & Evening': `<strong>Please arrive from 12:00pm</strong> ahead of the 1:00pm ceremony at Eastwood Park Country House. The wedding breakfast and evening celebration follow on.`,
+    'Evening Reception': `<strong>Please arrive from 7:00pm</strong> to join us at Eastwood Park Country House for the evening celebration.`
   };
 
   function currentGuestType() {
@@ -336,11 +376,11 @@
     ],
     main: [
       ['Chicken Goujons with Chips & Beans', 'Chicken Goujons, chips & beans'],
-      ['Sausage & Mash with Peas', 'Sausage & mash with peas']
+      ['Cheese and Tomato Pasta', 'Cheese and Tomato Pasta']
     ],
     dessert: [
       ['Ice Cream Sundae', 'Ice cream sundae'],
-      ['Brownie or Ice Cream', 'Brownie or ice cream']
+      ['Brownie and Ice Cream', 'Brownie and ice cream']
     ]
   };
 
