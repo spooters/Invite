@@ -196,8 +196,8 @@
               <span>Day &amp; Evening</span>
             </label>
             <label class="toggle-option">
-              <input type="radio" name="guest_type" value="Evening Only">
-              <span>Evening Reception Only</span>
+              <input type="radio" name="guest_type" value="Evening Reception">
+              <span>Evening Reception</span>
             </label>
           </div>
         </fieldset>
@@ -232,6 +232,7 @@
               <input type="number" id="evening_guests" name="evening_guests_count" min="1" max="10" value="1">
             </div>
           </div>
+          <div id="evening-guest-names"></div>
         </div>
 
       </div>
@@ -264,7 +265,7 @@
 
   const ARRIVAL_COPY = {
     'Day & Evening': `<strong>Please arrive from 12:00pm</strong> ahead of the 1:00pm ceremony at Eastwood Park, Gloucestershire. The wedding breakfast and evening celebration follow on.`,
-    'Evening Only': `<strong>Please arrive from 7:00pm</strong> to join us at Eastwood Park, Gloucestershire, for the evening celebration.`
+    'Evening Reception': `<strong>Please arrive from 7:00pm</strong> to join us at Eastwood Park, Gloucestershire, for the evening celebration.`
   };
 
   function currentGuestType() {
@@ -289,7 +290,7 @@
   syncToggleStyles();
 
   function syncGuestType() {
-    const isEveningOnly = currentGuestType() === 'Evening Only';
+    const isEveningOnly = currentGuestType() === 'Evening Reception';
     arrivalNote.innerHTML = ARRIVAL_COPY[currentGuestType()];
     mealFields.classList.toggle('is-visible', !isEveningOnly);
     eveningFields.classList.toggle('is-visible', isEveningOnly);
@@ -387,6 +388,22 @@
 
   document.getElementById('adults').addEventListener('input', renderPersonMealBlocks);
   document.getElementById('children').addEventListener('input', renderPersonMealBlocks);
+
+  function renderEveningGuestNames() {
+    const count = Math.max(1, Math.min(10, parseInt(document.getElementById('evening_guests').value, 10) || 1));
+    const container = document.getElementById('evening-guest-names');
+    let html = '';
+    for (let i = 1; i <= count; i++) {
+      html += `
+        <div class="field">
+          <label for="evening${i}_name">${i === 1 ? 'Your name' : `Guest ${i} name`}</label>
+          <input type="text" id="evening${i}_name" name="evening${i}_name" placeholder="${i === 1 ? 'Your name' : 'Guest name'}">
+        </div>`;
+    }
+    container.innerHTML = html;
+  }
+  document.getElementById('evening_guests').addEventListener('input', renderEveningGuestNames);
+  renderEveningGuestNames();
 
   renderPersonMealBlocks();
   syncGuestType();
