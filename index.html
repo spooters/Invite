@@ -76,7 +76,8 @@
 
       <div class="detail-card">
         <h3>Schedule</h3>
-        <p>1:00pm — Ceremony<br>Wedding breakfast to follow<br>Evening celebration into the night</p>
+        <p><strong>Day guests</strong> — arrive from 12:00pm<br>1:00pm — Ceremony<br>Wedding breakfast to follow</p>
+        <p style="margin-top:8px;"><strong>Evening guests</strong> — join us from 7:00pm<br>Evening celebration into the night</p>
       </div>
 
       <div class="detail-card">
@@ -185,25 +186,54 @@
         </div>
       </fieldset>
 
-      <div id="meal-fields" class="meal-fields is-visible">
+      <div id="attending-fields" class="attending-fields is-visible">
 
-        <div class="party-count-row">
-          <div class="field">
-            <label for="adults">Adults attending (including yourself)</label>
-            <input type="number" id="adults" name="adults_count" min="1" max="10" value="1">
+        <fieldset>
+          <legend>Which part of the day are you joining?</legend>
+          <div class="toggle-group" role="radiogroup" aria-label="Guest type">
+            <label class="toggle-option">
+              <input type="radio" name="guest_type" value="Day & Evening" checked>
+              <span>Day &amp; Evening</span>
+            </label>
+            <label class="toggle-option">
+              <input type="radio" name="guest_type" value="Evening Only">
+              <span>Evening Reception Only</span>
+            </label>
           </div>
+        </fieldset>
+
+        <div id="arrival-note" class="arrival-note"></div>
+
+        <div id="meal-fields" class="meal-fields is-visible">
+
+          <div class="party-count-row">
+            <div class="field">
+              <label for="adults">Adults attending (including yourself)</label>
+              <input type="number" id="adults" name="adults_count" min="1" max="10" value="1">
+            </div>
+            <div class="field">
+              <label for="children">Children attending</label>
+              <input type="number" id="children" name="children_count" min="0" max="10" value="0">
+            </div>
+          </div>
+
+          <div id="person-meal-blocks"></div>
+
           <div class="field">
-            <label for="children">Children attending</label>
-            <input type="number" id="children" name="children_count" min="0" max="10" value="0">
+            <label for="dietary">Allergies or dietary requirements</label>
+            <textarea id="dietary" name="dietary" placeholder="Let us know about any allergies, intolerances, or other dietary needs — please mention which person they apply to"></textarea>
           </div>
         </div>
 
-        <div id="person-meal-blocks"></div>
-
-        <div class="field">
-          <label for="dietary">Allergies or dietary requirements</label>
-          <textarea id="dietary" name="dietary" placeholder="Let us know about any allergies, intolerances, or other dietary needs — please mention which person they apply to"></textarea>
+        <div id="evening-fields" class="meal-fields">
+          <div class="party-count-row">
+            <div class="field">
+              <label for="evening_guests">Number of evening guests attending</label>
+              <input type="number" id="evening_guests" name="evening_guests_count" min="1" max="10" value="1">
+            </div>
+          </div>
         </div>
+
       </div>
 
       <div class="field">
@@ -226,17 +256,58 @@
 <script>
   // Toggle the meal-choice fields based on attendance response.
   const attendingRadios = document.querySelectorAll('input[name="attending"]');
+  const attendingFields = document.getElementById('attending-fields');
+  const guestTypeRadios = document.querySelectorAll('input[name="guest_type"]');
   const mealFields = document.getElementById('meal-fields');
+  const eveningFields = document.getElementById('evening-fields');
+  const arrivalNote = document.getElementById('arrival-note');
+
+  const ARRIVAL_COPY = {
+    'Day & Evening': `<strong>Please arrive from 12:00pm</strong> ahead of the 1:00pm ceremony at Eastwood Park, Gloucestershire. The wedding breakfast and evening celebration follow on.`,
+    'Evening Only': `<strong>Please arrive from 7:00pm</strong> to join us at Eastwood Park, Gloucestershire, for the evening celebration.`
+  };
+
+  function currentGuestType() {
+    return document.querySelector('input[name="guest_type"]:checked')?.value || 'Day & Evening';
+  }
+
+  function toggleRequired(container, makeRequired) {
+    container.querySelectorAll('input, textarea').forEach(el => {
+      if (!makeRequired) {
+        el.removeAttribute('required');
+      }
+    });
+  }
+
+  function syncToggleStyles() {
+    document.querySelectorAll('.toggle-option').forEach(label => {
+      const input = label.querySelector('input');
+      label.classList.toggle('is-checked', input.checked);
+    });
+  }
+  guestTypeRadios.forEach(r => r.addEventListener('change', syncToggleStyles));
+  syncToggleStyles();
+
+  function syncGuestType() {
+    const isEveningOnly = currentGuestType() === 'Evening Only';
+    arrivalNote.innerHTML = ARRIVAL_COPY[currentGuestType()];
+    mealFields.classList.toggle('is-visible', !isEveningOnly);
+    eveningFields.classList.toggle('is-visible', isEveningOnly);
+    toggleRequired(mealFields, !isEveningOnly);
+    toggleRequired(eveningFields, isEveningOnly);
+    if (!isEveningOnly) renderPersonMealBlocks();
+  }
+  guestTypeRadios.forEach(r => r.addEventListener('change', syncGuestType));
 
   function syncMealFields() {
     const declined = document.querySelector('input[name="attending"]:checked')?.value === 'Regretfully declines';
-    mealFields.classList.toggle('is-visible', !declined);
-    mealFields.querySelectorAll('input, textarea').forEach(el => {
+    attendingFields.classList.toggle('is-visible', !declined);
+    attendingFields.querySelectorAll('input, textarea').forEach(el => {
       if (declined) {
         el.removeAttribute('required');
       }
     });
-    if (!declined) renderPersonMealBlocks();
+    if (!declined) syncGuestType();
   }
   attendingRadios.forEach(r => r.addEventListener('change', syncMealFields));
 
@@ -318,6 +389,7 @@
   document.getElementById('children').addEventListener('input', renderPersonMealBlocks);
 
   renderPersonMealBlocks();
+  syncGuestType();
   syncMealFields();
 
   // Submit via fetch so we can show an inline confirmation instead of

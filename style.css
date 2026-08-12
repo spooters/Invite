@@ -239,6 +239,8 @@ section {
   color: var(--ink);
 }
 
+.detail-card p strong { color: var(--blue-deep); }
+
 .detail-card a { white-space: nowrap; }
 
 /* ---------- Menu ---------- */
@@ -406,6 +408,64 @@ textarea { resize: vertical; min-height: 70px; }
   display: block;
   animation: fade-down 0.4s ease-out;
 }
+
+.attending-fields {
+  display: none;
+}
+.attending-fields.is-visible {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  animation: fade-down 0.4s ease-out;
+}
+
+.toggle-group {
+  display: flex;
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.toggle-option {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  padding: 11px 10px;
+  cursor: pointer;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  background: var(--cream);
+  transition: background 0.2s ease, color 0.2s ease;
+  border-right: 1px solid var(--line);
+}
+.toggle-option:last-child { border-right: none; }
+
+.toggle-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toggle-option:has(input:checked),
+.toggle-option.is-checked {
+  background: var(--blue-deep);
+  color: var(--cream);
+}
+
+.toggle-option:has(input:focus-visible) {
+  outline: 2px solid var(--blue-deep);
+  outline-offset: 2px;
+}
+
+.arrival-note {
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: var(--cream);
+  border: 1px solid var(--paper-border);
+  padding: 14px 18px;
+  line-height: 1.6;
+}
+.arrival-note strong { color: var(--blue-deep); }
 
 button.submit {
   align-self: center;
