@@ -168,19 +168,22 @@
     <p class="rsvp-intro">We can't wait to celebrate with you — please let us know if you'll be joining us, and your meal choices, below.</p>
 
     <!--
-      SETUP: This form builds a pre-filled email using a mailto: link —
-      no third-party service, no account, no billing. When a guest hits
-      "Send RSVP", their own email app opens with the message ready to
-      go; they just need to press send.
+      SETUP: This form posts to a Google Apps Script you deploy under
+      your own free Google account — no third-party company, no
+      billing tier. It emails you a formatted summary AND (optionally)
+      logs each RSVP as a row in a Google Sheet.
 
-      1. Replace YOUR_EMAIL@example.com below with your real address.
-      2. That's it — no signup, no dashboard, nothing to configure.
-
-      Trade-off vs a form service like Formspree: this relies on the
-      guest's device having an email app set up, and on them actually
-      pressing send in that app — it can't submit silently on its own.
+      See /google-apps-script/Code.gs and the README for the full
+      walkthrough. In short:
+        1. Deploy Code.gs as a Web App (Execute as: Me, Access: Anyone).
+        2. Copy the deployment URL — it ends in /exec.
+        3. Replace YOUR_SCRIPT_URL below with that real URL.
     -->
-    <form class="rsvp-form" id="rsvp-form" data-rsvp-email="YOUR_EMAIL@example.com">
+    <form class="rsvp-form" id="rsvp-form"
+          action="https://script.google.com/macros/s/AKfycbx576AoSMMDx4NHPZSuDiGeiXmwRQiBBzYjrDLN2FLw3j3C1CACeKoCI4bUfoFKj726/exec"
+          method="POST" target="hidden-submit-frame">
+
+      <input type="hidden" id="summary_field" name="summary" value="">
 
       <div class="field">
         <label for="name">Full name(s)</label>
@@ -278,6 +281,10 @@
       <button class="submit" type="submit">Send RSVP</button>
       <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
     </form>
+
+    <!-- Hidden target so the form posts to Google Apps Script without
+         navigating the guest away from the page. -->
+    <iframe name="hidden-submit-frame" id="hidden-submit-frame" style="display:none" title="RSVP submission"></iframe>
   </section>
 
   <footer>
@@ -511,25 +518,47 @@
   const form = document.getElementById('rsvp-form');
   const status = document.getElementById('form-status');
   const submitBtn = form.querySelector('button.submit');
+  const summaryField = document.getElementById('summary_field');
+  const hiddenFrame = document.getElementById('hidden-submit-frame');
+
+  let awaitingSubmit = false;
+
+  // The iframe fires a 'load' event once when the page first loads
+  // (about:blank) and again each time the form posts into it. We only
+  // want to react to loads that follow an actual submission.
+  hiddenFrame.addEventListener('load', () => {
+    if (!awaitingSubmit) return;
+    awaitingSubmit = false;
+    submitBtn.disabled = false;
+    status.dataset.state = 'success';
+    status.textContent = 'Thank you — your RSVP has been sent!';
+    form.reset();
+    renderPersonMealBlocks();
+    renderEveningGuestNames();
+    syncGuestType();
+    syncMealFields();
+  });
 
   form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const targetEmail = form.dataset.rsvpEmail;
-    if (!targetEmail || targetEmail.includes('YOUR_EMAIL')) {
+    if (form.action.includes('YOUR_SCRIPT_URL')) {
+      e.preventDefault();
       status.dataset.state = 'error';
-      status.textContent = 'RSVP form is not yet connected — the site owner needs to add their email address.';
+      status.textContent = 'RSVP form is not yet connected — the site owner needs to deploy the Apps Script and add its URL.';
       return;
     }
 
-    const guestName = fieldValue('name') || 'Guest';
-    const subject = `Wedding RSVP — ${guestName}`;
-    const body = buildEmailBody();
-    const mailtoUrl = `mailto:${targetEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    // Fill the hidden field with the same readable summary used
+    // previously for the mailto version, so the email and sheet row
+    // both get a clean, human-readable breakdown.
+    summaryField.value = buildEmailBody();
 
-    status.dataset.state = 'success';
-    status.textContent = 'Opening your email app — please press send there to complete your RSVP.';
-    window.location.href = mailtoUrl;
+    submitBtn.disabled = true;
+    status.dataset.state = '';
+    status.textContent = 'Sending…';
+    awaitingSubmit = true;
+
+    // No e.preventDefault() — let the browser submit the form
+    // natively into the hidden iframe.
   });
 </script>
 
