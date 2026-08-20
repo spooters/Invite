@@ -168,17 +168,19 @@
     <p class="rsvp-intro">We can't wait to celebrate with you — please let us know if you'll be joining us, and your meal choices, below.</p>
 
     <!--
-      SETUP: This form posts to Formspree (https://formspree.io), a free
-      service that emails form submissions to you — no backend required,
-      which makes it a good fit for a static GitHub Pages site.
+      SETUP: This form builds a pre-filled email using a mailto: link —
+      no third-party service, no account, no billing. When a guest hits
+      "Send RSVP", their own email app opens with the message ready to
+      go; they just need to press send.
 
-      1. Create a free account at https://formspree.io
-      2. Create a new form and copy its endpoint, e.g. https://formspree.io/f/abcd1234
-      3. Replace the placeholder action URL below with your real endpoint.
-      4. Formspree will ask you to confirm your email address before it
-         starts forwarding submissions — do this before sharing the site.
+      1. Replace YOUR_EMAIL@example.com below with your real address.
+      2. That's it — no signup, no dashboard, nothing to configure.
+
+      Trade-off vs a form service like Formspree: this relies on the
+      guest's device having an email app set up, and on them actually
+      pressing send in that app — it can't submit silently on its own.
     -->
-    <form class="rsvp-form" id="rsvp-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+    <form class="rsvp-form" id="rsvp-form" data-rsvp-email="YOUR_EMAIL@example.com">
 
       <div class="field">
         <label for="name">Full name(s)</label>
@@ -449,48 +451,88 @@
   syncGuestType();
   syncMealFields();
 
-  // Submit via fetch so we can show an inline confirmation instead of
-  // navigating away to Formspree's own page.
+  // Build a plain-text summary of the RSVP for the email body.
+  function fieldValue(id) {
+    return document.getElementById(id)?.value.trim() || '';
+  }
+
+  function buildEmailBody() {
+    const lines = [];
+    const attending = document.querySelector('input[name="attending"]:checked')?.value || '';
+
+    lines.push(`Name: ${fieldValue('name')}`);
+    lines.push(`Email: ${fieldValue('email')}`);
+    lines.push(`Attending: ${attending}`);
+
+    if (attending === 'Joyfully accepts') {
+      const guestType = currentGuestType();
+      lines.push(`Guest type: ${guestType}`);
+      lines.push('');
+
+      if (guestType === 'Day & Evening') {
+        lines.push(`Adults: ${fieldValue('adults')}`);
+        lines.push(`Children: ${fieldValue('children')}`);
+        lines.push('');
+
+        document.querySelectorAll('#person-meal-blocks .person-block').forEach(block => {
+          const heading = block.querySelector('legend')?.textContent || 'Guest';
+          const guestName = block.querySelector('input[type="text"]')?.value.trim();
+          const starter = block.querySelector('input[name$="_starter"]:checked')?.value || '(none selected)';
+          const main = block.querySelector('input[name$="_main"]:checked')?.value || '(none selected)';
+          const dessert = block.querySelector('input[name$="_dessert"]:checked')?.value || '(none selected)';
+          lines.push(`${heading}${guestName ? ' — ' + guestName : ''}`);
+          lines.push(`  Starter: ${starter}`);
+          lines.push(`  Main: ${main}`);
+          lines.push(`  Dessert/Pudding: ${dessert}`);
+        });
+
+        lines.push('');
+        lines.push(`Dietary requirements: ${fieldValue('dietary') || 'None specified'}`);
+      } else {
+        lines.push(`Evening guests: ${fieldValue('evening_guests')}`);
+        document.querySelectorAll('#evening-guest-names input[type="text"]').forEach((input, i) => {
+          const val = input.value.trim();
+          if (val) lines.push(`  Guest ${i + 1} name: ${val}`);
+        });
+        lines.push('');
+        lines.push(`Dietary requirements: ${fieldValue('evening_dietary') || 'None specified'}`);
+      }
+    }
+
+    const note = fieldValue('message');
+    if (note) {
+      lines.push('');
+      lines.push(`Note for the couple: ${note}`);
+    }
+
+    return lines.join('\n');
+  }
+
   const form = document.getElementById('rsvp-form');
   const status = document.getElementById('form-status');
   const submitBtn = form.querySelector('button.submit');
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    if (form.action.includes('YOUR_FORM_ID')) {
+    const targetEmail = form.dataset.rsvpEmail;
+    if (!targetEmail || targetEmail.includes('YOUR_EMAIL')) {
       status.dataset.state = 'error';
-      status.textContent = 'RSVP form is not yet connected — the site owner needs to add their Formspree endpoint.';
+      status.textContent = 'RSVP form is not yet connected — the site owner needs to add their email address.';
       return;
     }
 
-    submitBtn.disabled = true;
-    status.dataset.state = '';
-    status.textContent = 'Sending…';
+    const guestName = fieldValue('name') || 'Guest';
+    const subject = `Wedding RSVP — ${guestName}`;
+    const body = buildEmailBody();
+    const mailtoUrl = `mailto:${targetEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-    try {
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: { 'Accept': 'application/json' }
-      });
-
-      if (response.ok) {
-        status.dataset.state = 'success';
-        status.textContent = 'Thank you — your RSVP has been sent!';
-        form.reset();
-        syncMealFields();
-      } else {
-        throw new Error('Request failed');
-      }
-    } catch (err) {
-      status.dataset.state = 'error';
-      status.textContent = 'Something went wrong sending your RSVP — please try again, or email us directly.';
-    } finally {
-      submitBtn.disabled = false;
-    }
+    status.dataset.state = 'success';
+    status.textContent = 'Opening your email app — please press send there to complete your RSVP.';
+    window.location.href = mailtoUrl;
   });
 </script>
 
 </body>
+
 </html>
