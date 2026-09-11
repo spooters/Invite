@@ -22,6 +22,24 @@ A minimal, static wedding website mirroring the printed invitation, with an RSVP
 
 3. **Update the Google Maps link** if needed — search the venue name on Google Maps, copy the share link, and swap it into the `href` on the Venue card.
 
+4. **Regenerate the QR code once you have your real domain.** `assets/rsvp-qr-code.png` currently points at a placeholder (`YOUR-DOMAIN-HERE.com`). Once you've bought and connected your real domain, regenerate it with:
+   ```python
+   import qrcode
+   url = 'https://your-real-domain.com/?key=savethedatehayleymarcus2027'
+   img = qrcode.make(url)
+   img.save('rsvp-qr-code.png')
+   ```
+   (Or use any free online QR generator with that same URL.) Print the QR code on the physical invites — scanning it takes guests straight in without typing the passcode.
+
+5. **To change the passcode later:** the site checks a SHA-256 hash rather than the plain text, so you can't just edit a string. Generate a new hash with:
+   ```python
+   import hashlib
+   print(hashlib.sha256('your-new-passcode'.encode()).hexdigest())
+   ```
+   Then paste the result into `CORRECT_HASH` near the top of the `<script>` block in `index.html`. Passcodes are checked lowercase and trimmed, so guests don't need to worry about capitalization.
+
+   **Note on the access gate:** this is a light deterrent, not real security — GitHub Pages only serves static files, so the page content technically ships to every visitor's browser regardless of the lock screen. It stops casual visitors, search engines, and people who've merely guessed the domain, but it won't stop someone determined and technical from viewing the page source. That's a reasonable trade-off for a wedding invite, but worth knowing.
+
 ## Hosting on GitHub Pages
 
 1. Create a new GitHub repository (e.g. `hayley-and-marcus-wedding`).
@@ -39,6 +57,7 @@ assets/
   floral-crop.jpg     hydrangea artwork, cropped from the invitation
   hills-crop.jpg      hillside artwork, cropped from the invitation
   favicon.png          browser tab icon
+  rsvp-qr-code.png      QR code for the invite — regenerate once your domain is live
 google-apps-script/
   Code.gs              the RSVP relay script — paste into script.google.com
 ```
