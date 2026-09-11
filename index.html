@@ -29,6 +29,7 @@
      See README for how to change the passcode or regenerate the QR code. -->
 <div id="lock-screen" class="lock-screen">
   <div class="lock-card">
+    <img class="lock-floral" src="assets/floral-crop.jpg" alt="" aria-hidden="true">
     <span class="lock-monogram">H &amp; M</span>
     <p class="lock-intro">This page is just for our invited guests.<br>Please enter the passcode from your invite.</p>
     <form id="lock-form" autocomplete="off">
@@ -36,6 +37,7 @@
       <button type="submit">Unlock</button>
     </form>
     <p id="lock-error" class="lock-error" role="alert"></p>
+    <img class="lock-hills" src="assets/hills-crop.jpg" alt="" aria-hidden="true">
   </div>
 </div>
 
@@ -193,12 +195,12 @@
 
       See /google-apps-script/Code.gs and the README for the full
       walkthrough. In short:
-        1. Deploy Code.gs as a Web App (ute as: Me, Access: Anyone).
-        2. Copy the deployment URL — it ends in /.
+        1. Deploy Code.gs as a Web App (Execute as: Me, Access: Anyone).
+        2. Copy the deployment URL — it ends in /exec.
         3. Replace YOUR_SCRIPT_URL below with that real URL.
     -->
     <form class="rsvp-form" id="rsvp-form"
-          action="https://script.google.com/macros/s/AKfycbyfTw1iSUKQjZjY1oes7daC3oe4skFLD_AymLrMpA7v2nFt_0Ns-lgvP3Op6ooZl2Y/exec"
+          action="https://script.google.com/macros/s/AKfycbyfTw1iSUKQjZjY1oes7daC3oe4skFLD_AymLrMpA7v2nFt_0Ns-lgvP3Op6ooZl2Y/exec
           method="POST" target="hidden-submit-frame">
 
       <input type="hidden" id="summary_field" name="summary" value="">
