@@ -275,12 +275,39 @@ section {
   display: block;
   animation: fade-down 0.35s ease-out;
 }
-.hotel-prices p {
-  margin: 0 0 6px;
-  font-size: 0.95rem;
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--paper-border);
 }
+.price-row:last-of-type { border-bottom: none; }
+
+.price-room {
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.price-sub {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.price-amount {
+  font-size: 1rem;
+  color: var(--blue-deep);
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .hotel-prices .hotel-note {
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 0.78rem;
   font-style: italic;
   color: var(--ink-soft);
