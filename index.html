@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hayley &amp; Marcus — 23rd January 2027</title>
 <meta name="description" content="The pleasure of your company is requested at the wedding of Hayley &amp; Marcus, Saturday 23rd January 2027 at Eastwood Park Country House.">
-<meta name="robots" content="noindex, nofollow">
 
 <!-- Open Graph / link preview -->
 <meta property="og:title" content="Hayley &amp; Marcus — 23rd January 2027">
@@ -23,25 +22,6 @@
 </head>
 <body>
 
-<!-- ================= ACCESS GATE ================= -->
-<!-- A light passcode gate — deters casual/search-engine visitors and
-     keeps the details for invited guests, without adding friction.
-     See README for how to change the passcode or regenerate the QR code. -->
-<div id="lock-screen" class="lock-screen">
-  <div class="lock-card">
-    <img class="lock-floral" src="assets/floral-crop.jpg" alt="" aria-hidden="true">
-    <span class="lock-monogram">H &amp; M</span>
-    <p class="lock-intro">This page is just for our invited guests.<br>Please enter the passcode from your invite.</p>
-    <form id="lock-form" autocomplete="off">
-      <input type="password" id="lock-input" placeholder="Passcode" autocomplete="off" autocapitalize="off" spellcheck="false" required>
-      <button type="submit">Unlock</button>
-    </form>
-    <p id="lock-error" class="lock-error" role="alert"></p>
-    <img class="lock-hills" src="assets/hills-crop.jpg" alt="" aria-hidden="true">
-  </div>
-</div>
-
-<div id="site-content" class="site-content">
 <main>
 
   <!-- ================= INVITE CARD (mirrors the printed invitation) ================= -->
@@ -105,36 +85,11 @@
           Reveal hotel prices
         </button>
         <div id="hotel-prices" class="hotel-prices">
-          <div class="price-row">
-            <span class="price-room">Main House Family<br><span class="price-sub">1 double &amp; 1 single bed, with view</span></span>
-            <span class="price-amount">£160</span>
-          </div>
-          <div class="price-row">
-            <span class="price-room">Main House Double<br><span class="price-sub">With view</span></span>
-            <span class="price-amount">£135</span>
-          </div>
-          <div class="price-row">
-            <span class="price-room">Main House Double</span>
-            <span class="price-amount">£110</span>
-          </div>
-          <div class="price-row">
-            <span class="price-room">Main House Single</span>
-            <span class="price-amount">£80</span>
-          </div>
-          <div class="price-row">
-            <span class="price-room">Economy Double</span>
-            <span class="price-amount">£80</span>
-          </div>
-          <p class="hotel-note">Per night, 2027 rates — subject to change. Call or email reception to book.</p>
+          <p>Classic Double — <strong>£120</strong> per night, bed &amp; breakfast</p>
+          <p>Superior Room — <strong>£145</strong> per night, bed &amp; breakfast</p>
+          <p>Feature Room — <strong>£175</strong> per night, bed &amp; breakfast</p>
+          <p class="hotel-note">Demo prices — to be confirmed with the venue.</p>
         </div>
-      </div>
-
-      <div class="detail-card">
-        <h3>Gift List</h3>
-        <p>Your presence is truly the only gift we need. But for anyone who'd like to, we've put together a small gift list — entirely optional, no obligation at all.</p>
-        <p style="margin-top:8px;">
-          <a href="https://prezola.com/buy/view/339337" target="_blank" rel="noopener">View our gift list →</a>
-        </p>
       </div>
 
       <div class="detail-card">
@@ -225,10 +180,24 @@
         3. Replace YOUR_SCRIPT_URL below with that real URL.
     -->
     <form class="rsvp-form" id="rsvp-form"
-          action="https://script.google.com/macros/s/AKfycbyfTw1iSUKQjZjY1oes7daC3oe4skFLD_AymLrMpA7v2nFt_0Ns-lgvP3Op6ooZl2Y/exec"
+          action="https://script.google.com/macros/s/AKfycbx576AoSMMDx4NHPZSuDiGeiXmwRQiBBzYjrDLN2FLw3j3C1CACeKoCI4bUfoFKj726/exec"
           method="POST" target="hidden-submit-frame">
 
       <input type="hidden" id="summary_field" name="summary" value="">
+
+      <!-- Shared secret matching FORM_TOKEN in Code.gs. Filters out bots
+           that POST generic junk straight at the Apps Script URL without
+           ever loading this page. -->
+      <input type="hidden" name="form_key" value="hm2027-925b60d0c21438de5321c9c0">
+
+      <!-- Honeypot: hidden from real guests via CSS (see .hp-field in
+           style.css), left blank by them, but often filled in by simple
+           bots that fill every input they find. Any non-empty value here
+           tells Code.gs to silently discard the submission. -->
+      <div class="hp-field" aria-hidden="true">
+        <label for="company">Company</label>
+        <input type="text" id="company" name="company" tabindex="-1" autocomplete="off">
+      </div>
 
       <div class="field">
         <label for="name">Full name(s)</label>
@@ -338,79 +307,8 @@
   </footer>
 
 </main>
-</div>
 
 <script>
-  // ---------- Access gate ----------
-  // Passcode is checked as a SHA-256 hash rather than compared in
-  // plaintext, so it isn't sitting in the page source verbatim. This
-  // is a light deterrent for a static site, not real security — see
-  // README for details.
-  const CORRECT_HASH = '8c5b766a0c22c931dd07583633b6908a893bc91389d239b98c297cc30cc1f983';
-  const STORAGE_KEY = 'hm_wedding_unlocked';
-
-  const lockScreen = document.getElementById('lock-screen');
-  const siteContent = document.getElementById('site-content');
-  const lockForm = document.getElementById('lock-form');
-  const lockInput = document.getElementById('lock-input');
-  const lockError = document.getElementById('lock-error');
-
-  async function sha256Hex(text) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
-  function unlockSite() {
-    lockScreen.classList.add('is-hidden');
-    siteContent.classList.add('is-unlocked');
-  }
-
-  async function tryUnlock(candidate) {
-    if (!candidate) return false;
-    const hash = await sha256Hex(candidate.trim().toLowerCase());
-    if (hash === CORRECT_HASH) {
-      try { localStorage.setItem(STORAGE_KEY, hash); } catch (err) { /* ignore */ }
-      unlockSite();
-      return true;
-    }
-    return false;
-  }
-
-  (async function initLock() {
-    // Already unlocked on this device?
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === CORRECT_HASH) {
-        unlockSite();
-        return;
-      }
-    } catch (err) { /* ignore */ }
-
-    // Scanned a QR code with ?key=... — auto-unlock and tidy the URL.
-    const params = new URLSearchParams(window.location.search);
-    const keyParam = params.get('key');
-    if (keyParam) {
-      const ok = await tryUnlock(keyParam);
-      if (ok) {
-        params.delete('key');
-        const cleanUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-        window.history.replaceState({}, '', cleanUrl);
-        return;
-      }
-    }
-  })();
-
-  lockForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    lockError.textContent = '';
-    const ok = await tryUnlock(lockInput.value);
-    if (!ok) {
-      lockError.textContent = "That doesn't match — please check your invite and try again.";
-      lockInput.value = '';
-      lockInput.focus();
-    }
-  });
-
   // Toggle the meal-choice fields based on attendance response.
   const attendingRadios = document.querySelectorAll('input[name="attending"]');
   const attendingFields = document.getElementById('attending-fields');
