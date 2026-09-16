@@ -557,7 +557,90 @@ button.submit:disabled { opacity: 0.6; cursor: default; }
 .form-status[data-state="success"] { color: var(--blue-deep); }
 .form-status[data-state="error"] { color: #a6473d; }
 
-/* ---------- Footer ---------- */
+/* ---------- Access gate ---------- */
+
+.site-content {
+  display: none;
+}
+.site-content.is-unlocked {
+  display: block;
+}
+
+.lock-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--cream);
+}
+.lock-screen.is-hidden {
+  display: none;
+}
+
+.lock-card {
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  padding: 40px 28px;
+  border: 1px solid var(--paper-border);
+  background: var(--cream);
+}
+
+.lock-monogram {
+  display: block;
+  font-family: var(--font-script);
+  font-size: 2.4rem;
+  color: var(--blue-deep);
+  margin-bottom: 14px;
+}
+
+.lock-intro {
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 22px;
+}
+
+#lock-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#lock-input {
+  width: 100%;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  background: var(--cream-deep);
+  color: var(--ink);
+  text-align: center;
+}
+
+#lock-form button {
+  padding: 11px 20px;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--blue-deep);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+#lock-form button:hover { background: var(--ink); }
+
+.lock-error {
+  min-height: 1.3em;
+  margin: 14px 0 0;
+  font-size: 0.9rem;
+  color: #a6473d;
+}
 
 footer {
   text-align: center;

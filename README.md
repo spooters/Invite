@@ -9,8 +9,8 @@ A minimal, static wedding website mirroring the printed invitation, with an RSVP
    This form posts to a small script you deploy under your own free Google account. It emails you a formatted RSVP summary and (optionally) logs every response as a row in a Google Sheet. No third-party company, no account signup beyond Google, no submission caps that turn into a bill.
 
    - **Create a Sheet (optional but recommended):** go to [sheets.google.com](https://sheets.google.com), create a blank sheet named e.g. "Wedding RSVPs." Copy its ID from the URL — the long string between `/d/` and `/edit`.
-   - **Create the script:** go to [script.google.com](https://script.google.com) → New project. Delete the placeholder code and paste in the contents of `google-apps-script/Code.gs` from this folder.
-   - **Configure it:** at the top of the script, set `TO_EMAIL` to your real email address, and `SHEET_ID` to the ID you copied (or leave as-is to skip the Sheet and only get emails).
+   - **Create the script:** go to [script.google.com](https://script.google.com) → New project. Delete the placeholder code and paste in the contents of `Code.gs` from this folder.
+   - **Configure it:** at the top of the script, set `TO_EMAIL` to your real email address, and `SHEET_ID` to the ID you copied (or leave as-is to skip the Sheet and only get emails). Also set `FORM_TOKEN` to match the hidden `form_key` value in `index.html` — this pairing is what blocks bots that POST directly at the URL below without loading the page.
    - **Deploy it:** click **Deploy → New deployment → Web app**. Set "Execute as" to yourself, and "Who has access" to "Anyone" (this must be public so the site can reach it without guests logging in). Click Deploy.
    - **Approve permissions:** the first deploy shows an "unverified app" warning — this is normal for your own script. Click **Advanced → Go to project (unsafe) → Allow**. You're authorizing your own script to send email from your own account.
    - **Copy the URL:** deployment gives you a URL ending in `/exec`. Open `index.html`, find `action="https://script.google.com/macros/s/YOUR_SCRIPT_URL/exec"` on the `<form>` tag, and replace it with your real URL.
@@ -38,7 +38,9 @@ A minimal, static wedding website mirroring the printed invitation, with an RSVP
    ```
    Then paste the result into `CORRECT_HASH` near the top of the `<script>` block in `index.html`. Passcodes are checked lowercase and trimmed, so guests don't need to worry about capitalization.
 
-   **Note on the access gate:** this is a light deterrent, not real security — GitHub Pages only serves static files, so the page content technically ships to every visitor's browser regardless of the lock screen. It stops casual visitors, search engines, and people who've merely guessed the domain, but it won't stop someone determined and technical from viewing the page source. That's a reasonable trade-off for a wedding invite, but worth knowing.
+   **Note on the access gate:** this is a light deterrent, not real security — GitHub Pages only serves static files, so the page content technically ships to every visitor's browser regardless of the lock screen. It stops casual visitors, search engines, and people who've merely guessed the domain, but it won't stop someone determined and technical from viewing the page source. That's a reasonable trade-off for a wedding invite, but worth knowing. It also doesn't protect the RSVP endpoint itself — see the anti-spam notes below.
+
+6. **Anti-spam on the RSVP form:** the form carries a hidden `form_key` field that must match `FORM_TOKEN` in `Code.gs`, plus a hidden honeypot field (`company`) that real guests never fill in. Both are checked server-side in `doPost` before anything is emailed or logged, along with basic field validation and a site-wide rate limit. If you ever suspect the token has leaked, change it in both files and redeploy.
 
 ## Hosting on GitHub Pages
 
@@ -53,13 +55,13 @@ A minimal, static wedding website mirroring the printed invitation, with an RSVP
 ```
 index.html          the page
 style.css            all styling
+Code.gs              the RSVP relay script — paste into script.google.com
+CNAME                custom domain for GitHub Pages
 assets/
   floral-crop.jpg     hydrangea artwork, cropped from the invitation
   hills-crop.jpg      hillside artwork, cropped from the invitation
   favicon.png          browser tab icon
   rsvp-qr-code.png      QR code for the invite — regenerate once your domain is live
-google-apps-script/
-  Code.gs              the RSVP relay script — paste into script.google.com
 ```
 
 ## Notes
