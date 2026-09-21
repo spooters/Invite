@@ -57,9 +57,10 @@ body {
   font-size: 19px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; /* safety net: no element should ever cause horizontal scroll */
 }
 
-img { max-width: 100%; display: block; }
+img, svg { max-width: 100%; height: auto; display: block; }
 
 a {
   color: var(--blue-deep);
@@ -108,6 +109,7 @@ a:hover { color: var(--ink); }
 }
 
 .floral {
+  width: 100%;
   margin: 0 auto 6px;
   max-width: 560px;
   opacity: 0;
@@ -139,7 +141,9 @@ a:hover { color: var(--ink); }
 }
 
 .divider {
+  display: block;
   width: 150px;
+  max-width: 90%;
   height: 14px;
   margin: 14px auto;
   color: var(--sage);
@@ -170,6 +174,7 @@ a:hover { color: var(--ink); }
 }
 
 .hills {
+  width: 100%;
   margin: 30px auto 0;
   max-width: 600px;
   -webkit-mask-image: radial-gradient(ellipse 58% 75% at center, black 50%, transparent 100%);
